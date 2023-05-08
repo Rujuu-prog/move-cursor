@@ -1,0 +1,13 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "move-cursor-app",
+  "outputfilename": "move-cursor-app",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "rujuu",
+    "email": "81368541+Rujuu-prog@users.noreply.github.com"
+  }
+}

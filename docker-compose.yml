@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  wails:
+    container_name: move-cursor
+    build: .
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=host.docker.internal:0
+      - QT_X11_NO_MITSHM=1
+    # command: tail -f /dev/null
+    tty: true
+    ports:
+      - "34115:34115"
