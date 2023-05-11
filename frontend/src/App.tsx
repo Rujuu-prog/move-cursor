@@ -1,23 +1,43 @@
-import { useState } from "react";
+import "./App.css";
+import {
+  StartCursorMovement,
+  StopCursorMovement,
+} from "../wailsjs/go/main/App";
+import { useState, useEffect } from "react";
+//antd
 import {
   CaretRightOutlined,
   BorderOutlined,
   ThunderboltOutlined,
   CheckCircleTwoTone,
   CloseCircleTwoTone,
-  RetweetOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import "./App.css";
 import {
-  StartCursorMovement,
-  StopCursorMovement,
-} from "../wailsjs/go/main/App";
-import { Layout, Button, theme, Typography, Divider } from "antd";
+  Layout,
+  Button,
+  theme,
+  Typography,
+  Divider,
+  Image,
+  Space,
+  Avatar,
+} from "antd";
+// img
+import icon from "./assets/images/move-cursor-icon-v1.1.png";
+// module
+import { loadFont } from "./LoadFont";
+import { Menu } from "./components/layout/header/Menu";
+
 const { Header, Content, Footer } = Layout;
 
 const { Title, Text } = Typography;
 
 function App() {
+  useEffect(() => {
+    loadFont();
+  }, []);
+
   const [status, setStatus] = useState(false);
   const {
     token: { colorBgContainer },
@@ -36,23 +56,7 @@ function App() {
   return (
     <div id="app">
       <Layout className="layout">
-        <Header
-          style={{ position: "sticky", top: 0, zIndex: 1, width: "100%" }}
-        >
-          <Title
-            level={2}
-            style={{
-              float: "left",
-              width: 220,
-              height: 31,
-              margin: "16px 24px 16px 0",
-              color: "#fff",
-            }}
-          >
-            <RetweetOutlined />
-            Move Cursor
-          </Title>
-        </Header>
+        <Menu />
         <Content style={{ padding: "0 50px" }}>
           <div
             style={{
@@ -61,14 +65,25 @@ function App() {
               background: colorBgContainer,
             }}
           >
-            <Button type="primary" onClick={start}>
-              <CaretRightOutlined />
-              Start
-            </Button>
-            <Button danger ghost onClick={stop}>
-              <BorderOutlined />
-              Stop
-            </Button>
+            <Space size={4} align="center">
+              <Button
+                type="primary"
+                onClick={start}
+                style={{ backgroundColor: "#22d0a7" }}
+              >
+                <CaretRightOutlined />
+                Start
+              </Button>
+              <Button
+                danger
+                ghost
+                onClick={stop}
+                style={{ borderColor: "#e52236" }}
+              >
+                <BorderOutlined />
+                Stop
+              </Button>
+            </Space>
             <Divider plain>
               <ThunderboltOutlined />
               Status
