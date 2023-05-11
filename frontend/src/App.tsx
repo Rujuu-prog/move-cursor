@@ -26,7 +26,6 @@ import {
 // img
 import icon from "./assets/images/move-cursor-icon-v1.1.png";
 // module
-import { loadFont } from "./LoadFont";
 import { Menu } from "./components/layout/header/Menu";
 
 const { Header, Content, Footer } = Layout;
@@ -34,10 +33,6 @@ const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
 
 function App() {
-  useEffect(() => {
-    loadFont();
-  }, []);
-
   const [status, setStatus] = useState(false);
   const {
     token: { colorBgContainer },
