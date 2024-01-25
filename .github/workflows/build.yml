@@ -1,67 +1,29 @@
-name: Wails build
+name: Wails build with Docker Compose
 
 on:
   push:
     branches:
       - main
 
-env:
-  NODE_OPTIONS: "--max-old-space-size=4096"
-
 jobs:
   build:
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        build:
-          - name: 'App'
-            platform:  'linux/amd64'
-            os: 'ubuntu-latest'
-            goos: 'linux'
-            goarch: 'amd64'
-          - name: 'App'
-            platform:  'windows/amd64'
-            os: 'windows-latest'
-            goos: 'windows'
-            goarch: 'amd64'
-          - name: 'App'
-            platform:  'darwin/universal'
-            os: 'macos-latest'
-            goos: 'darwin'
-            goarch: 'amd64'
-
-    runs-on: ${{ matrix.build.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.20'
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-      - name: Cache Go modules
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      
-      - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+    - name: Docker Compose up
+      run: docker-compose up -d
 
-      - name: Install dependencies
-        run: |
-          npm install
-          go mod tidy
+    - name: Run Wails Build in Docker
+      run: |
+        docker exec move-cursor /bin/sh -c "wails build -n App"
 
-      - name: Build wails
-        run: |
-          export GOOS=${{ matrix.build.goos }}
-          export GOARCH=${{ matrix.build.goarch }}
-          wails build -n ${{ matrix.build.name }}
-
+    - name: Docker Compose down
+      run: docker-compose down
