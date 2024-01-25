@@ -12,7 +12,7 @@ env:
 jobs:
   build:
     strategy:
-    # Failure in one platform build won't impact the others
+      # Failure in one platform build won't impact the others
       fail-fast: false
       matrix:
         build:
@@ -27,11 +27,27 @@ jobs:
             os: 'macos-latest'
 
     runs-on: ${{ matrix.build.os }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
+
+      # Install dependencies for linux/amd64 platform
+      - name: Install dependencies (Linux)
+        if: matrix.build.platform == 'linux/amd64'
+        run: sudo apt-get update && sudo apt-get install -y libx11-xcb-dev
+
+      # Setup environment variables for Windows build
+      - name: Setup Environment Variables for Windows build
+        if: matrix.build.platform == 'windows/amd64'
+        run: |
+          echo "CGO_ENABLED=1" >> $GITHUB_ENV
+          echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
+          echo "CXX=x86_64-w64-mingw32-g++" >> $GITHUB_ENV
+          echo "GOARCH=amd64" >> $GITHUB_ENV
+          echo "GOOS=windows" >> $GITHUB_ENV
 
       - name: Build wails
         uses: dAppServer/wails-build-action@v2.2
