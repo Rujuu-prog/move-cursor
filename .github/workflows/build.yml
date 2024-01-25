@@ -6,25 +6,29 @@ on:
       - main
 
 env:
-  # Necessary for most environments as build failure can occur due to OOM issues
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
   build:
     strategy:
-      # Failure in one platform build won't impact the others
       fail-fast: false
       matrix:
         build:
           - name: 'App'
             platform:  'linux/amd64'
             os: 'ubuntu-latest'
+            goos: 'linux'
+            goarch: 'amd64'
           - name: 'App'
             platform:  'windows/amd64'
             os: 'windows-latest'
+            goos: 'windows'
+            goarch: 'amd64'
           - name: 'App'
             platform:  'darwin/universal'
             os: 'macos-latest'
+            goos: 'darwin'
+            goarch: 'amd64'
 
     runs-on: ${{ matrix.build.os }}
 
@@ -34,26 +38,30 @@ jobs:
         with:
           submodules: recursive
 
-      # Install dependencies for linux/amd64 platform
-      - name: Install dependencies (Linux)
-        if: matrix.build.platform == 'linux/amd64'
-        run: sudo apt-get update && sudo apt-get install -y libx11-xcb-dev
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20'
 
-      # Setup environment variables for Windows build
-      - name: Setup Environment Variables for Windows build
-        if: matrix.build.platform == 'windows/amd64'
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install dependencies
         run: |
-          echo "CGO_ENABLED=1" >> $GITHUB_ENV
-          echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
-          echo "CXX=x86_64-w64-mingw32-g++" >> $GITHUB_ENV
-          echo "GOARCH=amd64" >> $GITHUB_ENV
-          echo "GOOS=windows" >> $GITHUB_ENV
+          npm install
+          go mod tidy
 
       - name: Build wails
-        uses: dAppServer/wails-build-action@v2.2
-        id: build
-        with:
-          build-name: ${{ matrix.build.name }}
-          build-platform: ${{ matrix.build.platform }}
-          package: false
-          go-version: '1.20'
+        run: |
+          export GOOS=${{ matrix.build.goos }}
+          export GOARCH=${{ matrix.build.goarch }}
+          wails build -n ${{ matrix.build.name }}
+
