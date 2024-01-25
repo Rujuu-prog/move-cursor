@@ -21,6 +21,9 @@ jobs:
     - name: Docker Compose up
       run: docker-compose up -d
 
+    - name: Docker Compose state
+      run: docker-compose ps
+
     - name: Run Wails Build in Docker
       run: |
         docker exec move-cursor /bin/sh -c "wails build -n App"
